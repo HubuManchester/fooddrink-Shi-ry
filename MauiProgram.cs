@@ -33,6 +33,8 @@ public static class MauiProgram
         builder.Services.AddSingleton<MainPage>();
         builder.Services.AddTransient<AddItemPage>();
         builder.Services.AddTransient<DetailPage>();
+        builder.Services.AddTransient<EditItemPage>();
+        builder.Services.AddTransient<EditItemViewModel>();
 
 #if DEBUG
         builder.Logging.AddDebug();

@@ -19,6 +19,10 @@ public class DetailViewModel : BaseViewModel
     public ICommand EditCommand { get; }
     public ICommand DeleteCommand { get; }
 
+    // 用于 UI 判断是否有照片
+    public bool HasPhoto => _currentItem != null && !string.IsNullOrEmpty(_currentItem.PhotoPath);
+    public bool HasNoPhoto => _currentItem != null && string.IsNullOrEmpty(_currentItem.PhotoPath);
+
     // 路由传参：接收字符串 ID
     public string ItemId
     {
@@ -41,6 +45,8 @@ public class DetailViewModel : BaseViewModel
             OnPropertyChanged(nameof(DisplayText));
             OnPropertyChanged(nameof(NutritionText));
             OnPropertyChanged(nameof(HasItem));
+            OnPropertyChanged(nameof(HasPhoto));      // 通知 UI 刷新
+            OnPropertyChanged(nameof(HasNoPhoto));    // 通知 UI 刷新
         }
     }
 
@@ -135,45 +141,85 @@ public class DetailViewModel : BaseViewModel
 
     private async Task TakePhotoAsync()
     {
+        if (_currentItem is null)
+        {
+            await ShowAlertAsync("Error", "No food item loaded.");
+            return;
+        }
+
         try
         {
-            if (!await PermissionService.RequestCameraPermissionAsync())
+            // 请求相机权限
+            var cameraStatus = await Permissions.RequestAsync<Permissions.Camera>();
+            if (cameraStatus != PermissionStatus.Granted)
             {
-                await ShowAlertAsync("Permission Denied", "Camera access is required.");
+                await ShowAlertAsync("Permission Denied", "Camera permission is required to take photos.");
                 return;
             }
 
-            var photo = await MediaPicker.Default.CapturePhotoAsync();
-            if (photo is null) return;
+            // 请求存储权限（Android 需要）
+            var storageStatus = await Permissions.RequestAsync<Permissions.StorageWrite>();
+            if (storageStatus != PermissionStatus.Granted)
+            {
+                await ShowAlertAsync("Permission Denied", "Storage permission is required to save photos.");
+                return;
+            }
 
-            var savedPath = Path.Combine(FileSystem.CacheDirectory, $"{Guid.NewGuid()}.jpg");
+            IsBusy = true;
+            SemanticScreenReader.Announce("Opening camera...");
+
+            // 拍照
+            var photo = await MediaPicker.Default.CapturePhotoAsync();
+            if (photo is null)
+            {
+                await ShowAlertAsync("Cancelled", "Photo capture was cancelled.");
+                return;
+            }
+
+            // 保存照片到应用本地目录
+            var fileName = $"{_currentItem.Id}_{DateTime.Now:yyyyMMdd_HHmmss}.jpg";
+            var savedPath = Path.Combine(FileSystem.AppDataDirectory, fileName);
+
             using var stream = await photo.OpenReadAsync();
             using var fileStream = File.Create(savedPath);
             await stream.CopyToAsync(fileStream);
 
-            if (_currentItem != null)
+            // 更新当前食物的照片路径
+            _currentItem.PhotoPath = savedPath;
+
+            // 同时保存到数据库和内存服务
+            if (_databaseService != null)
             {
-                _currentItem.PhotoPath = savedPath;
-                if (_databaseService != null)
-                {
-                    await _databaseService.UpdateAsync(_currentItem);
-                }
+                await _databaseService.UpdateAsync(_currentItem);
             }
 
+            if (_foodService != null)
+            {
+                await _foodService.UpdateAsync(_currentItem);
+            }
+
+            // 刷新 UI
+            OnPropertyChanged(nameof(CurrentItem));
+            OnPropertyChanged(nameof(HasPhoto));
+            OnPropertyChanged(nameof(HasNoPhoto));
+
             SemanticScreenReader.Announce("Photo captured and saved.");
-            await ShowAlertAsync("Photo Captured", "Photo saved successfully.");
+            await ShowAlertAsync("Photo Captured", "Photo has been saved to this food item.");
         }
         catch (Exception ex)
         {
-            await ShowAlertAsync("Camera Error", ex.Message);
+            await ShowAlertAsync("Camera Error", $"Failed to take photo: {ex.Message}");
+        }
+        finally
+        {
+            IsBusy = false;
         }
     }
 
     private async Task EditAsync()
     {
         if (_currentItem is null) return;
-        // 导航到编辑页面
-        await Shell.Current.GoToAsync("..");
+        await Shell.Current.GoToAsync($"{nameof(Views.EditItemPage)}?id={_currentItem.Id}");
     }
 
     private async Task DeleteAsync()
@@ -189,6 +235,11 @@ public class DetailViewModel : BaseViewModel
         {
             IsBusy = true;
 
+            if (!string.IsNullOrEmpty(_currentItem.PhotoPath) && File.Exists(_currentItem.PhotoPath))
+            {
+                File.Delete(_currentItem.PhotoPath);
+            }
+
             if (_databaseService != null)
             {
                 await _databaseService.DeleteAsync(_currentItem.Id);
@@ -200,6 +251,7 @@ public class DetailViewModel : BaseViewModel
             }
 
             HapticFeedback.Default.Perform(HapticFeedbackType.Click);
+            SemanticScreenReader.Announce($"{_currentItem.Name} deleted");
             await ShowAlertAsync("Deleted", "Food item has been removed.");
             await Shell.Current.GoToAsync("..");
         }

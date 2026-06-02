@@ -29,7 +29,43 @@
 				</VerticalStackLayout>
 			</Border>
 
-			<!-- Nutrition Card -->
+            <!--photo-->
+            <Border StrokeThickness="1" 
+                    Stroke="#E0E0E0" 
+                    Padding="16"
+                    IsVisible="{Binding HasPhoto}">
+                <VerticalStackLayout Spacing="8">
+                    <Label Text="📷 Food Photo"
+                           FontSize="16"
+                           FontAttributes="Bold"
+                           TextColor="#333333" />
+                    <Image Source="{Binding CurrentItem.PhotoPath}"
+                           Aspect="AspectFill"
+                           HeightRequest="200"
+                           WidthRequest="250"
+                           HorizontalOptions="Center"
+                           SemanticProperties.Description="Food photo" />
+                </VerticalStackLayout>
+            </Border>
+
+            <!--no photo -->
+            <Border StrokeThickness="1" 
+                    Stroke="#E0E0E0" 
+                    Padding="16"
+                    IsVisible="{Binding HasNoPhoto}">
+                <VerticalStackLayout Spacing="8" HorizontalOptions="Center">
+                    <Label Text="📷 No Photo"
+                           FontSize="14"
+                           TextColor="#999999"
+                           HorizontalOptions="Center" />
+                    <Label Text="Tap the camera button below to take a photo"
+                           FontSize="12"
+                           TextColor="#999999"
+                           HorizontalOptions="Center" />
+                </VerticalStackLayout>
+            </Border>
+
+            <!-- Nutrition Card -->
 			<Border StrokeThickness="1" Stroke="#E0E0E0" Padding="16">
 				<VerticalStackLayout Spacing="8">
 					<Label Text="Nutrition Facts"
