@@ -4,11 +4,13 @@ using FoodApp.Services;
 
 namespace FoodApp.ViewModels;
 
-[QueryProperty(nameof(FoodItem), "foodItem")]
+[QueryProperty(nameof(ItemId), "id")]
 public class DetailViewModel : BaseViewModel
 {
     private readonly FoodService _foodService;
-    private FoodItem? _foodItem;
+    private readonly FoodDatabaseService _databaseService;
+    private FoodItem? _currentItem;
+    private string _itemId = string.Empty;
 
     public ICommand SpeakCommand { get; }
     public ICommand StopSpeechCommand { get; }
@@ -17,24 +19,39 @@ public class DetailViewModel : BaseViewModel
     public ICommand EditCommand { get; }
     public ICommand DeleteCommand { get; }
 
-    public FoodItem? FoodItem
+    // 路由传参：接收字符串 ID
+    public string ItemId
     {
-        get => _foodItem;
+        get => _itemId;
         set
         {
-            _foodItem = value;
-            OnPropertyChanged();
-            OnPropertyChanged(nameof(DisplayText));
-            OnPropertyChanged(nameof(NutritionText));
+            _itemId = value;
+            // 当 ID 传入时，加载数据
+            _ = LoadItemAsync(value);
         }
     }
 
-    public string DisplayText => _foodItem is null ? string.Empty : $"{_foodItem.Name} - {_foodItem.Calories} kcal";
-    public string NutritionText => _foodItem is null ? string.Empty : $"{_foodItem.NutritionSummary}";
+    public FoodItem? CurrentItem
+    {
+        get => _currentItem;
+        set
+        {
+            _currentItem = value;
+            OnPropertyChanged();
+            OnPropertyChanged(nameof(DisplayText));
+            OnPropertyChanged(nameof(NutritionText));
+            OnPropertyChanged(nameof(HasItem));
+        }
+    }
 
-    public DetailViewModel(FoodService foodService)
+    public bool HasItem => _currentItem != null;
+    public string DisplayText => _currentItem is null ? string.Empty : $"{_currentItem.Name} - {_currentItem.Calories} kcal";
+    public string NutritionText => _currentItem is null ? string.Empty : _currentItem.NutritionSummary;
+
+    public DetailViewModel(FoodService foodService, FoodDatabaseService databaseService)
     {
         _foodService = foodService;
+        _databaseService = databaseService;
         Title = "Food Details";
 
         SpeakCommand = new Command(async () => await SpeakAsync());
@@ -45,14 +62,52 @@ public class DetailViewModel : BaseViewModel
         DeleteCommand = new Command(async () => await DeleteAsync());
     }
 
+    // 根据 ID 加载数据
+    private async Task LoadItemAsync(string id)
+    {
+        if (string.IsNullOrWhiteSpace(id)) return;
+        if (IsBusy) return;
+
+        try
+        {
+            IsBusy = true;
+
+            // 优先从数据库获取
+            if (_databaseService != null)
+            {
+                CurrentItem = await _databaseService.GetByIdAsync(id);
+            }
+
+            // 如果数据库没有，从内存服务获取
+            if (CurrentItem == null && _foodService != null)
+            {
+                CurrentItem = await _foodService.GetByIdAsync(id);
+            }
+
+            if (CurrentItem == null)
+            {
+                await ShowAlertAsync("Error", "Food item not found.");
+                await Shell.Current.GoToAsync("..");
+            }
+        }
+        catch (Exception ex)
+        {
+            await ShowAlertAsync("Error", $"Failed to load: {ex.Message}");
+        }
+        finally
+        {
+            IsBusy = false;
+        }
+    }
+
     private async Task SpeakAsync()
     {
-        if (_foodItem is null) return;
+        if (_currentItem is null) return;
 
-        var text = $"{_foodItem.Name}. {_foodItem.Description}. " +
-                   $"{_foodItem.Calories} calories, {_foodItem.Protein} grams protein, " +
-                   $"{_foodItem.Carbs} grams carbs, {_foodItem.Fat} grams fat. " +
-                   $"Allergy information: {_foodItem.AllergyInfo}";
+        var text = $"{_currentItem.Name}. {_currentItem.Description}. " +
+                   $"{_currentItem.Calories} calories, {_currentItem.Protein} grams protein, " +
+                   $"{_currentItem.Carbs} grams carbs, {_currentItem.Fat} grams fat. " +
+                   $"Allergy information: {_currentItem.AllergyInfo}";
 
         try
         {
@@ -84,7 +139,7 @@ public class DetailViewModel : BaseViewModel
         {
             if (!await PermissionService.RequestCameraPermissionAsync())
             {
-                await ShowAlertAsync("Permission Denied", "Camera access is required to take photos.");
+                await ShowAlertAsync("Permission Denied", "Camera access is required.");
                 return;
             }
 
@@ -96,8 +151,17 @@ public class DetailViewModel : BaseViewModel
             using var fileStream = File.Create(savedPath);
             await stream.CopyToAsync(fileStream);
 
+            if (_currentItem != null)
+            {
+                _currentItem.PhotoPath = savedPath;
+                if (_databaseService != null)
+                {
+                    await _databaseService.UpdateAsync(_currentItem);
+                }
+            }
+
             SemanticScreenReader.Announce("Photo captured and saved.");
-            await ShowAlertAsync("Photo Captured", $"Photo saved to: {savedPath}");
+            await ShowAlertAsync("Photo Captured", "Photo saved successfully.");
         }
         catch (Exception ex)
         {
@@ -107,22 +171,34 @@ public class DetailViewModel : BaseViewModel
 
     private async Task EditAsync()
     {
-        if (_foodItem is null) return;
+        if (_currentItem is null) return;
+        // 导航到编辑页面
         await Shell.Current.GoToAsync("..");
     }
 
     private async Task DeleteAsync()
     {
-        if (_foodItem is null) return;
+        if (_currentItem is null) return;
 
         var confirm = await Shell.Current.DisplayAlert("Confirm Delete",
-            $"Are you sure you want to delete {_foodItem.Name}?", "Yes", "No");
+            $"Are you sure you want to delete {_currentItem.Name}?", "Yes", "No");
 
         if (!confirm) return;
 
         try
         {
-            await _foodService.DeleteAsync(_foodItem.Id);
+            IsBusy = true;
+
+            if (_databaseService != null)
+            {
+                await _databaseService.DeleteAsync(_currentItem.Id);
+            }
+
+            if (_foodService != null)
+            {
+                await _foodService.DeleteAsync(_currentItem.Id);
+            }
+
             HapticFeedback.Default.Perform(HapticFeedbackType.Click);
             await ShowAlertAsync("Deleted", "Food item has been removed.");
             await Shell.Current.GoToAsync("..");
@@ -130,6 +206,10 @@ public class DetailViewModel : BaseViewModel
         catch (Exception ex)
         {
             await ShowAlertAsync("Error", $"Failed to delete: {ex.Message}");
+        }
+        finally
+        {
+            IsBusy = false;
         }
     }
 }

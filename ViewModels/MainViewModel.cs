@@ -2,7 +2,7 @@
 using System.Windows.Input;
 using FoodApp.Models;
 using FoodApp.Services;
-using CommunityToolkit.Maui;
+
 
 namespace FoodApp.ViewModels;
 
@@ -88,18 +88,16 @@ public class MainViewModel : BaseViewModel
 
     private async Task GoToAddPage()
     {
-        await MainThread.InvokeOnMainThreadAsync(async () =>
-        {
-            await Shell.Current.GoToAsync(nameof(Views.AddItemPage));
-        });
+        await Shell.Current.GoToAsync(nameof(Views.AddItemPage));
     }
 
     private async Task GoToDetailPage(FoodItem item)
     {
+        if (item == null) return;
+
         await MainThread.InvokeOnMainThreadAsync(async () =>
         {
-            var parameters = new Dictionary<string, object> { { "foodItem", item } };
-            await Shell.Current.GoToAsync($"{nameof(Views.DetailPage)}", parameters);
+            await Shell.Current.GoToAsync($"{nameof(Views.DetailPage)}?id={item.Id}");
         });
     }
 }

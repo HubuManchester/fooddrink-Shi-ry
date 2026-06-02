@@ -1,0 +1,76 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="FoodApp.Views.SettingsPage"
+             Title="Settings">
+
+    <ScrollView>
+        <VerticalStackLayout Padding="20" Spacing="16">
+
+            <Label Text="⚙️ App Settings"
+                   FontSize="28"
+                   FontAttributes="Bold"
+                   SemanticProperties.HeadingLevel="Level1" />
+
+            <!-- 主题设置卡片 -->
+            <Border Style="{StaticResource CardStyle}">
+                <VerticalStackLayout Spacing="12">
+                    <Label Text="Theme"
+                           FontSize="16"
+                           FontAttributes="Bold" />
+                    <Grid ColumnDefinitions="*,*,*" ColumnSpacing="8">
+                        <Button Text="Light"
+                                Command="{Binding SetLightThemeCommand}"
+                                BackgroundColor="{StaticResource LightCardBackground}"
+                                TextColor="{StaticResource LightText}" />
+                        <Button Text="Dark"
+                                Command="{Binding SetDarkThemeCommand}"
+                                BackgroundColor="{StaticResource DarkCardBackground}"
+                                TextColor="{StaticResource DarkText}" />
+                        <Button Text="System"
+                                Command="{Binding SetSystemThemeCommand}"
+                                BackgroundColor="{StaticResource Primary}"
+                                TextColor="White" />
+                    </Grid>
+                </VerticalStackLayout>
+            </Border>
+
+            <!-- 无障碍设置卡片 -->
+            <Border Style="{StaticResource CardStyle}">
+                <VerticalStackLayout Spacing="12">
+                    <Label Text="♿ Accessibility"
+                           FontSize="16"
+                           FontAttributes="Bold" />
+
+                    <Grid ColumnDefinitions="*,Auto" ColumnSpacing="12">
+                        <VerticalStackLayout Spacing="4">
+                            <Label Text="Large Text Mode"
+                                   FontSize="16"
+                                   FontAttributes="Bold" />
+                            <Label Text="Increase text size for better readability"
+                                   FontSize="12"
+                                   TextColor="{StaticResource LightSubText}" />
+                        </VerticalStackLayout>
+                        <Switch Grid.Column="1"
+                                x:Name="LargeTextSwitch"
+                                Toggled="OnLargeTextToggled"
+                                SemanticProperties.Hint="Toggle large text mode" />
+                    </Grid>
+                </VerticalStackLayout>
+            </Border>
+
+            <!-- 预览区域 -->
+            <Border Style="{StaticResource CardStyle}">
+                <VerticalStackLayout Spacing="8">
+                    <Label Text="Preview"
+                           FontSize="16"
+                           FontAttributes="Bold" />
+                    <Label x:Name="PreviewLabel"
+                           Text="This text will change size when large text mode is enabled."
+                           FontSize="14" />
+                </VerticalStackLayout>
+            </Border>
+
+        </VerticalStackLayout>
+    </ScrollView>
+</ContentPage>
