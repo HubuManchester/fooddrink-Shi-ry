@@ -1,0 +1,98 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="FoodApp.Views.AddItemPage"
+             Title="{Binding Title}"
+             BackgroundColor="White">
+
+	<ScrollView>
+		<VerticalStackLayout Padding="16,12" Spacing="16">
+
+			<Label Text="Food Information"
+                   FontSize="18"
+                   FontAttributes="Bold"
+                   TextColor="#333333" />
+
+			<Entry Placeholder="Food Name *"
+                   Text="{Binding Name}"
+                   BackgroundColor="#F5F5F5"
+                   TextColor="#333333"
+                   SemanticProperties.Hint="Required - enter the food name" />
+
+			<Picker Title="Category *"
+                    TitleColor="#9E9E9E"
+                    TextColor="#333333"
+                    BackgroundColor="#F5F5F5"
+                    SelectedItem="{Binding Category}">
+				<Picker.Items>
+					<x:String>Breakfast</x:String>
+					<x:String>Lunch</x:String>
+					<x:String>Dinner</x:String>
+					<x:String>Snack</x:String>
+					<x:String>Drink</x:String>
+				</Picker.Items>
+			</Picker>
+
+			<Editor Placeholder="Description"
+                    Text="{Binding Description}"
+                    HeightRequest="100"
+                    BackgroundColor="#F5F5F5"
+                    TextColor="#333333"
+                    AutoSize="TextChanges"
+                    SemanticProperties.Hint="Optional description" />
+
+			<Label Text="Nutrition (per serving)"
+                   FontSize="16"
+                   FontAttributes="Bold"
+                   TextColor="#333333"
+                   Margin="0,8,0,0" />
+
+			<Grid ColumnDefinitions="*,*,*,*" ColumnSpacing="8">
+				<Entry Placeholder="Calories *"
+                       Text="{Binding Calories}"
+                       Keyboard="Numeric"
+                       BackgroundColor="#F5F5F5"
+                       TextColor="#333333" />
+				<Entry Grid.Column="1"
+                       Placeholder="Protein"
+                       Text="{Binding Protein}"
+                       Keyboard="Numeric"
+                       BackgroundColor="#F5F5F5"
+                       TextColor="#333333" />
+				<Entry Grid.Column="2"
+                       Placeholder="Carbs"
+                       Text="{Binding Carbs}"
+                       Keyboard="Numeric"
+                       BackgroundColor="#F5F5F5"
+                       TextColor="#333333" />
+				<Entry Grid.Column="3"
+                       Placeholder="Fat"
+                       Text="{Binding Fat}"
+                       Keyboard="Numeric"
+                       BackgroundColor="#F5F5F5"
+                       TextColor="#333333" />
+			</Grid>
+
+			<Entry Placeholder="Allergy Information (optional)"
+                   Text="{Binding AllergyInfo}"
+                   BackgroundColor="#F5F5F5"
+                   TextColor="#333333" />
+
+			<Grid ColumnDefinitions="*,*" ColumnSpacing="12" Margin="0,24,0,0">
+				<Button Text="Cancel"
+                        BackgroundColor="#9E9E9E"
+                        Command="{Binding CancelCommand}"
+                        SemanticProperties.Hint="Cancel and go back" />
+				<Button Grid.Column="1"
+                        Text="Save"
+                        BackgroundColor="#4CAF50"
+                        Command="{Binding SaveCommand}"
+                        SemanticProperties.Hint="Save this food item" />
+			</Grid>
+
+			<ActivityIndicator IsVisible="{Binding IsBusy}"
+                               IsRunning="{Binding IsBusy}"
+                               Color="#2196F3" />
+		</VerticalStackLayout>
+	</ScrollView>
+</ContentPage>

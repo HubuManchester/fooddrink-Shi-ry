@@ -1,0 +1,129 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="FoodApp.Views.DetailPage"
+             Title="{Binding Title}"
+             BackgroundColor="White">
+
+	<ScrollView>
+		<VerticalStackLayout Padding="16,12" Spacing="16">
+
+			<!-- Header Card -->
+			<Border StrokeThickness="0" Padding="20">
+				<Border.Background>
+					<LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
+						<GradientStop Color="#2196F3" Offset="0" />
+						<GradientStop Color="#1976D2" Offset="1" />
+					</LinearGradientBrush>
+				</Border.Background>
+				<VerticalStackLayout Spacing="8">
+					<Label Text="{Binding FoodItem.Name}"
+                           FontSize="24"
+                           FontAttributes="Bold"
+                           TextColor="White"
+                           HorizontalTextAlignment="Center" />
+					<Label Text="{Binding DisplayText}"
+                           FontSize="16"
+                           TextColor="#E3F2FD"
+                           HorizontalTextAlignment="Center" />
+				</VerticalStackLayout>
+			</Border>
+
+			<!-- Nutrition Card -->
+			<Border StrokeThickness="1" Stroke="#E0E0E0" Padding="16">
+				<VerticalStackLayout Spacing="8">
+					<Label Text="Nutrition Facts"
+                           FontSize="16"
+                           FontAttributes="Bold"
+                           TextColor="#333333" />
+					<Grid ColumnDefinitions="*,*,*,*" ColumnSpacing="8">
+						<Label Text="{Binding FoodItem.CaloriesLabel}"
+                               FontSize="14"
+                               TextColor="#2196F3"
+                               FontAttributes="Bold"
+                               HorizontalTextAlignment="Center" />
+						<Label Grid.Column="1"
+                               Text="P: {Binding FoodItem.Protein}g"
+                               FontSize="14"
+                               TextColor="#666666"
+                               HorizontalTextAlignment="Center" />
+						<Label Grid.Column="2"
+                               Text="C: {Binding FoodItem.Carbs}g"
+                               FontSize="14"
+                               TextColor="#666666"
+                               HorizontalTextAlignment="Center" />
+						<Label Grid.Column="3"
+                               Text="F: {Binding FoodItem.Fat}g"
+                               FontSize="14"
+                               TextColor="#666666"
+                               HorizontalTextAlignment="Center" />
+					</Grid>
+				</VerticalStackLayout>
+			</Border>
+
+			<!-- Description Card -->
+			<Border StrokeThickness="1" Stroke="#E0E0E0" Padding="16">
+				<VerticalStackLayout Spacing="8">
+					<Label Text="Description"
+                           FontSize="16"
+                           FontAttributes="Bold"
+                           TextColor="#333333" />
+					<Label Text="{Binding FoodItem.Description}"
+                           FontSize="14"
+                           TextColor="#666666" />
+					<Label Text="{Binding FoodItem.AllergyInfo}"
+                           FontSize="13"
+                           TextColor="#F44336"
+                           FontAttributes="Italic" />
+				</VerticalStackLayout>
+			</Border>
+
+			<!-- Hardware Feature Buttons -->
+			<Label Text="Device Features"
+                   FontSize="16"
+                   FontAttributes="Bold"
+                   TextColor="#333333"
+                   Margin="0,8,0,0" />
+
+			<Grid ColumnDefinitions="*,*" ColumnSpacing="12">
+				<Button Text="Speak"
+                        BackgroundColor="#2196F3"
+                        Command="{Binding SpeakCommand}"
+                        SemanticProperties.Hint="Read food description aloud" />
+				<Button Grid.Column="1"
+                        Text="Stop"
+                        BackgroundColor="#9E9E9E"
+                        Command="{Binding StopSpeechCommand}"
+                        SemanticProperties.Hint="Stop reading aloud" />
+			</Grid>
+
+			<Grid ColumnDefinitions="*,*" ColumnSpacing="12">
+				<Button Text="Vibrate"
+                        BackgroundColor="#FF9800"
+                        Command="{Binding VibrateCommand}"
+                        SemanticProperties.Hint="Trigger vibration feedback" />
+				<Button Grid.Column="1"
+                        Text="Take Photo"
+                        BackgroundColor="#607D8B"
+                        Command="{Binding TakePhotoCommand}"
+                        SemanticProperties.Hint="Take a photo of this food" />
+			</Grid>
+
+			<Grid ColumnDefinitions="*,*" ColumnSpacing="12">
+				<Button Text="Edit"
+                        BackgroundColor="#4CAF50"
+                        Command="{Binding EditCommand}"
+                        SemanticProperties.Hint="Edit this food item" />
+				<Button Grid.Column="1"
+                        Text="Delete"
+                        BackgroundColor="#F44336"
+                        Command="{Binding DeleteCommand}"
+                        SemanticProperties.Hint="Delete this food item" />
+			</Grid>
+
+			<ActivityIndicator IsVisible="{Binding IsBusy}"
+                               IsRunning="{Binding IsBusy}"
+                               Color="#2196F3" />
+		</VerticalStackLayout>
+	</ScrollView>
+</ContentPage>
