@@ -15,5 +15,20 @@ public partial class DetailPage : ContentPage
     {
         base.OnAppearing();
         AccessibilityService.ApplyFontScale(this);
+
+        if (BindingContext is DetailViewModel vm)
+        {
+            vm.InitShakeDetection();
+        }
+    }
+
+    protected override void OnDisappearing()
+    {
+        base.OnDisappearing();
+
+        if (BindingContext is DetailViewModel vm)
+        {
+            vm.StopShakeDetection();
+        }
     }
 }

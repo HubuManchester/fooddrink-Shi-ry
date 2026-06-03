@@ -51,7 +51,7 @@
                 </VerticalStackLayout>
             </Border>
 
-            <!-- 无照片提示 -->
+            <!-- no photo -->
             <Border IsVisible="{Binding HasNoPhoto}"
                     StrokeThickness="1"
                     Stroke="{AppThemeBinding Light=#E0E0E0, Dark=#3A3A3C}"
@@ -133,7 +133,7 @@
                 </VerticalStackLayout>
             </Border>
 
-            <!-- 按钮区域 -->
+            <!-- botton section -->
             <Label Text="Device Features"
                    FontSize="16"
                    FontAttributes="Bold"
@@ -187,6 +187,35 @@
                         CornerRadius="8"
                         SemanticProperties.Hint="Delete this food item" />
             </Grid>
+
+            <Label Text="Favorites"
+                   FontSize="16"
+                   FontAttributes="Bold"
+                   TextColor="{AppThemeBinding Light={StaticResource LightText}, Dark={StaticResource DarkText}}"
+                   Margin="0,8,0,0" />
+
+            <Grid ColumnDefinitions="*,*" ColumnSpacing="12">
+                <!-- Add to Favorite button -->
+                <Button x:Name="AddFavoriteButton"
+                        Text="❤️ Add to Favorite"
+                        BackgroundColor="#E91E63"
+                        TextColor="White"
+                        Command="{Binding AddToFavoriteCommand}"
+                        IsVisible="{Binding IsNotFavorite}"
+                        CornerRadius="8"
+                        SemanticProperties.Hint="Add this food to favorites" />
+
+                <!-- Remove from Favorite button -->
+                <Button x:Name="RemoveFavoriteButton"
+                        Text="💔 Remove from Favorite"
+                        BackgroundColor="#9E9E9E"
+                        TextColor="White"
+                        Command="{Binding RemoveFromFavoriteCommand}"
+                        IsVisible="{Binding IsFavorite}"
+                        CornerRadius="8"
+                        SemanticProperties.Hint="Remove this food from favorites" />
+            </Grid>
+
 
             <ActivityIndicator IsVisible="{Binding IsBusy}"
                                IsRunning="{Binding IsBusy}"

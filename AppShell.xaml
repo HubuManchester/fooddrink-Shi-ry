@@ -11,6 +11,11 @@
                       Route="MainPage"
                       Icon="food_icon.png" />
 
+        <ShellContent Title="Favorites"
+                      ContentTemplate="{DataTemplate views:FavoritesPage}"
+                      Route="FavoritesPage"
+                      Icon="favorite_icon.png" />
+
         <ShellContent Title="Settings"
                       ContentTemplate="{DataTemplate views:SettingsPage}"
                       Route="SettingsPage"

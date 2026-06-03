@@ -12,25 +12,29 @@ public class DetailViewModel : BaseViewModel
     private FoodItem? _currentItem;
     private string _itemId = string.Empty;
 
+    // Shake detection
+    private bool _isShakeDetectionActive = false;
+    private DateTime _lastShakeTime = DateTime.MinValue;
+    private const double ShakeThreshold = 2.5;
+    private const int ShakeQuietPeriodMs = 500;
+
+    // Commands
     public ICommand SpeakCommand { get; }
     public ICommand StopSpeechCommand { get; }
     public ICommand VibrateCommand { get; }
     public ICommand TakePhotoCommand { get; }
     public ICommand EditCommand { get; }
     public ICommand DeleteCommand { get; }
+    public ICommand AddToFavoriteCommand { get; }
+    public ICommand RemoveFromFavoriteCommand { get; }
 
-    // 用于 UI 判断是否有照片
-    public bool HasPhoto => _currentItem != null && !string.IsNullOrEmpty(_currentItem.PhotoPath);
-    public bool HasNoPhoto => _currentItem != null && string.IsNullOrEmpty(_currentItem.PhotoPath);
-
-    // 路由传参：接收字符串 ID
+    // Properties
     public string ItemId
     {
         get => _itemId;
         set
         {
             _itemId = value;
-            // 当 ID 传入时，加载数据
             _ = LoadItemAsync(value);
         }
     }
@@ -44,13 +48,17 @@ public class DetailViewModel : BaseViewModel
             OnPropertyChanged();
             OnPropertyChanged(nameof(DisplayText));
             OnPropertyChanged(nameof(NutritionText));
-            OnPropertyChanged(nameof(HasItem));
-            OnPropertyChanged(nameof(HasPhoto));      // 通知 UI 刷新
-            OnPropertyChanged(nameof(HasNoPhoto));    // 通知 UI 刷新
+            OnPropertyChanged(nameof(HasPhoto));
+            OnPropertyChanged(nameof(HasNoPhoto));
+            OnPropertyChanged(nameof(IsFavorite));
+            OnPropertyChanged(nameof(IsNotFavorite));
         }
     }
 
-    public bool HasItem => _currentItem != null;
+    public bool IsFavorite => _currentItem?.IsFavorite ?? false;
+    public bool IsNotFavorite => !IsFavorite;
+    public bool HasPhoto => _currentItem != null && !string.IsNullOrEmpty(_currentItem.PhotoPath);
+    public bool HasNoPhoto => _currentItem != null && string.IsNullOrEmpty(_currentItem.PhotoPath);
     public string DisplayText => _currentItem is null ? string.Empty : $"{_currentItem.Name} - {_currentItem.Calories} kcal";
     public string NutritionText => _currentItem is null ? string.Empty : _currentItem.NutritionSummary;
 
@@ -66,9 +74,10 @@ public class DetailViewModel : BaseViewModel
         TakePhotoCommand = new Command(async () => await TakePhotoAsync());
         EditCommand = new Command(async () => await EditAsync());
         DeleteCommand = new Command(async () => await DeleteAsync());
+        AddToFavoriteCommand = new Command(async () => await AddToFavoriteAsync());
+        RemoveFromFavoriteCommand = new Command(async () => await RemoveFromFavoriteAsync());
     }
 
-    // 根据 ID 加载数据
     private async Task LoadItemAsync(string id)
     {
         if (string.IsNullOrWhiteSpace(id)) return;
@@ -78,16 +87,30 @@ public class DetailViewModel : BaseViewModel
         {
             IsBusy = true;
 
-            // 优先从数据库获取
+            // ALWAYS try to get from database first
             if (_databaseService != null)
             {
                 CurrentItem = await _databaseService.GetByIdAsync(id);
+
+                if (CurrentItem != null)
+                {
+                    System.Diagnostics.Debug.WriteLine($"=== Loaded from database: {CurrentItem.Name}, LocalId={CurrentItem.LocalId} ===");
+                }
             }
 
-            // 如果数据库没有，从内存服务获取
+            // If not in database, try memory service
             if (CurrentItem == null && _foodService != null)
             {
                 CurrentItem = await _foodService.GetByIdAsync(id);
+
+                if (CurrentItem != null)
+                {
+                    System.Diagnostics.Debug.WriteLine($"=== Loaded from memory: {CurrentItem.Name} ===");
+
+                    // Save to database so it has a LocalId
+                    await _databaseService.AddAsync(CurrentItem);
+                    System.Diagnostics.Debug.WriteLine($"=== Saved to database: {CurrentItem.Name} ===");
+                }
             }
 
             if (CurrentItem == null)
@@ -141,34 +164,20 @@ public class DetailViewModel : BaseViewModel
 
     private async Task TakePhotoAsync()
     {
-        if (_currentItem is null)
-        {
-            await ShowAlertAsync("Error", "No food item loaded.");
-            return;
-        }
+        if (_currentItem is null) return;
 
         try
         {
-            // 请求相机权限
             var cameraStatus = await Permissions.RequestAsync<Permissions.Camera>();
             if (cameraStatus != PermissionStatus.Granted)
             {
-                await ShowAlertAsync("Permission Denied", "Camera permission is required to take photos.");
-                return;
-            }
-
-            // 请求存储权限（Android 需要）
-            var storageStatus = await Permissions.RequestAsync<Permissions.StorageWrite>();
-            if (storageStatus != PermissionStatus.Granted)
-            {
-                await ShowAlertAsync("Permission Denied", "Storage permission is required to save photos.");
+                await ShowAlertAsync("Permission Denied", "Camera permission is required.");
                 return;
             }
 
             IsBusy = true;
             SemanticScreenReader.Announce("Opening camera...");
 
-            // 拍照
             var photo = await MediaPicker.Default.CapturePhotoAsync();
             if (photo is null)
             {
@@ -176,7 +185,6 @@ public class DetailViewModel : BaseViewModel
                 return;
             }
 
-            // 保存照片到应用本地目录
             var fileName = $"{_currentItem.Id}_{DateTime.Now:yyyyMMdd_HHmmss}.jpg";
             var savedPath = Path.Combine(FileSystem.AppDataDirectory, fileName);
 
@@ -184,10 +192,8 @@ public class DetailViewModel : BaseViewModel
             using var fileStream = File.Create(savedPath);
             await stream.CopyToAsync(fileStream);
 
-            // 更新当前食物的照片路径
             _currentItem.PhotoPath = savedPath;
 
-            // 同时保存到数据库和内存服务
             if (_databaseService != null)
             {
                 await _databaseService.UpdateAsync(_currentItem);
@@ -198,17 +204,16 @@ public class DetailViewModel : BaseViewModel
                 await _foodService.UpdateAsync(_currentItem);
             }
 
-            // 刷新 UI
             OnPropertyChanged(nameof(CurrentItem));
             OnPropertyChanged(nameof(HasPhoto));
             OnPropertyChanged(nameof(HasNoPhoto));
 
             SemanticScreenReader.Announce("Photo captured and saved.");
-            await ShowAlertAsync("Photo Captured", "Photo has been saved to this food item.");
+            await ShowAlertAsync("Photo Captured", "Photo has been saved.");
         }
         catch (Exception ex)
         {
-            await ShowAlertAsync("Camera Error", $"Failed to take photo: {ex.Message}");
+            await ShowAlertAsync("Camera Error", $"Failed: {ex.Message}");
         }
         finally
         {
@@ -227,7 +232,7 @@ public class DetailViewModel : BaseViewModel
         if (_currentItem is null) return;
 
         var confirm = await Shell.Current.DisplayAlert("Confirm Delete",
-            $"Are you sure you want to delete {_currentItem.Name}?", "Yes", "No");
+            $"Delete {_currentItem.Name}?", "Yes", "No");
 
         if (!confirm) return;
 
@@ -252,7 +257,6 @@ public class DetailViewModel : BaseViewModel
 
             HapticFeedback.Default.Perform(HapticFeedbackType.Click);
             SemanticScreenReader.Announce($"{_currentItem.Name} deleted");
-            await ShowAlertAsync("Deleted", "Food item has been removed.");
             await Shell.Current.GoToAsync("..");
         }
         catch (Exception ex)
@@ -262,6 +266,143 @@ public class DetailViewModel : BaseViewModel
         finally
         {
             IsBusy = false;
+        }
+    }
+
+    // ========== Favorite Methods ==========
+
+    private async Task AddToFavoriteAsync()
+    {
+        if (_currentItem == null) return;
+
+        if (_currentItem.IsFavorite)
+        {
+            await ShowAlertAsync("Already Favorite", $"{_currentItem.Name} is already in your favorites.");
+            return;
+        }
+
+        var confirm = await Shell.Current.DisplayAlert("Add to Favorites",
+            $"Add {_currentItem.Name} to your favorites?", "Yes", "No");
+
+        if (!confirm) return;
+
+        try
+        {
+            // Use the direct SQL update method
+            if (_databaseService != null)
+            {
+                var result = await _databaseService.SetFavoriteAsync(_currentItem.Id, true);
+                System.Diagnostics.Debug.WriteLine($"=== SetFavoriteAsync result: {result} rows affected ===");
+            }
+
+            _currentItem.IsFavorite = true;
+
+            OnPropertyChanged(nameof(IsFavorite));
+            OnPropertyChanged(nameof(IsNotFavorite));
+
+            HapticFeedback.Default.Perform(HapticFeedbackType.Click);
+            SemanticScreenReader.Announce($"{_currentItem.Name} added to favorites");
+            await ShowAlertAsync("Added!", $"❤️ {_currentItem.Name} has been added to your favorites.");
+        }
+        catch (Exception ex)
+        {
+            System.Diagnostics.Debug.WriteLine($"=== AddToFavoriteAsync error: {ex.Message} ===");
+            await ShowAlertAsync("Error", $"Failed to add: {ex.Message}");
+        }
+    }
+
+    private async Task RemoveFromFavoriteAsync()
+    {
+        if (_currentItem == null) return;
+
+        if (!_currentItem.IsFavorite)
+        {
+            return;
+        }
+
+        var confirm = await Shell.Current.DisplayAlert("Remove from Favorites",
+            $"Remove {_currentItem.Name} from favorites?", "Yes", "No");
+
+        if (!confirm) return;
+
+        try
+        {
+            _currentItem.IsFavorite = false;
+
+            if (_databaseService != null)
+            {
+                await _databaseService.UpdateAsync(_currentItem);
+            }
+
+            if (_foodService != null)
+            {
+                await _foodService.UpdateAsync(_currentItem);
+            }
+
+            OnPropertyChanged(nameof(IsFavorite));
+            OnPropertyChanged(nameof(IsNotFavorite));
+
+            HapticFeedback.Default.Perform(HapticFeedbackType.Click);
+            SemanticScreenReader.Announce($"{_currentItem.Name} removed from favorites");
+            await ShowAlertAsync("Removed", $"💔 {_currentItem.Name} removed from favorites.");
+        }
+        catch (Exception ex)
+        {
+            await ShowAlertAsync("Error", $"Failed to remove: {ex.Message}");
+        }
+    }
+
+    // ========== Shake Detection ==========
+
+    public void InitShakeDetection()
+    {
+        if (_isShakeDetectionActive) return;
+
+        if (Accelerometer.Default.IsSupported)
+        {
+            Accelerometer.Default.ReadingChanged += OnAccelerometerReadingChanged;
+            Accelerometer.Default.Start(SensorSpeed.Game);
+            _isShakeDetectionActive = true;
+            System.Diagnostics.Debug.WriteLine("=== Shake detection started ===");
+        }
+    }
+
+    public void StopShakeDetection()
+    {
+        if (!_isShakeDetectionActive) return;
+
+        if (Accelerometer.Default.IsSupported)
+        {
+            Accelerometer.Default.ReadingChanged -= OnAccelerometerReadingChanged;
+            Accelerometer.Default.Stop();
+            _isShakeDetectionActive = false;
+            System.Diagnostics.Debug.WriteLine("=== Shake detection stopped ===");
+        }
+    }
+
+    private void OnAccelerometerReadingChanged(object sender, AccelerometerChangedEventArgs e)
+    {
+        var data = e.Reading;
+        var x = data.Acceleration.X;
+        var y = data.Acceleration.Y;
+        var z = data.Acceleration.Z;
+
+        var acceleration = Math.Sqrt(x * x + y * y + z * z);
+
+        if (acceleration > ShakeThreshold)
+        {
+            var now = DateTime.Now;
+            if ((now - _lastShakeTime).TotalMilliseconds > ShakeQuietPeriodMs)
+            {
+                _lastShakeTime = now;
+
+                MainThread.BeginInvokeOnMainThread(async () =>
+                {
+                    // 震动反馈表示检测到晃动
+                    HapticFeedback.Default.Perform(HapticFeedbackType.LongPress);
+                    await AddToFavoriteAsync();
+                });
+            }
         }
     }
 }

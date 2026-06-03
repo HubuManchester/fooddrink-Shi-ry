@@ -36,6 +36,8 @@ public static class MauiProgram
         builder.Services.AddTransient<EditItemPage>();
         builder.Services.AddTransient<EditItemViewModel>();
         builder.Services.AddTransient<SettingsPage>();
+        builder.Services.AddTransient<FavoritesPage>();
+        builder.Services.AddTransient<FavoritesViewModel>();
 
 #if DEBUG
         builder.Logging.AddDebug();

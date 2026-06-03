@@ -52,6 +52,9 @@ public class FoodItem
     // 时间戳
     public DateTime CreatedAt { get; set; } = DateTime.Now;
 
+    // Add this property to FoodItem class
+    public bool IsFavorite { get; set; } = false;
+
     [Ignore]
     public string CaloriesLabel => $"{Calories} kcal";
 

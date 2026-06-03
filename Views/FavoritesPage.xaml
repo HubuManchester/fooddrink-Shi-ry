@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:models="clr-namespace:FoodApp.Models"
+             x:Class="FoodApp.Views.FavoritesPage"
+             Title="Favorites"
+             BackgroundColor="{AppThemeBinding Light={StaticResource LightBackground}, Dark={StaticResource DarkBackground}}">
+
+    <Grid>
+        <RefreshView Command="{Binding LoadFavoritesCommand}"
+                     IsRefreshing="{Binding IsBusy, Mode=OneWay}">
+
+            <CollectionView x:Name="FavoritesCollection"
+                            ItemsSource="{Binding FavoriteItems}"
+                            SelectionMode="Single"
+                            SelectionChanged="OnItemSelected"
+                            Margin="12">
+
+                <CollectionView.EmptyView>
+                    <VerticalStackLayout Padding="50" Spacing="10" HorizontalOptions="Center">
+                        <Label Text="❤️"
+                               FontSize="48"
+                               HorizontalOptions="Center" />
+                        <Label Text="No favorites yet"
+                               FontSize="16"
+                               HorizontalOptions="Center"
+                               FontAttributes="Bold"
+                               TextColor="{AppThemeBinding Light=#1F1F1F, Dark=#FFFFFF}" />
+                        <Label Text="Shake your phone in detail page to add favorites"
+                               FontSize="12"
+                               HorizontalOptions="Center"
+                               TextColor="{AppThemeBinding Light=#6C757D, Dark=#8E8E93}" />
+                    </VerticalStackLayout>
+                </CollectionView.EmptyView>
+
+                <CollectionView.ItemTemplate>
+                    <DataTemplate x:DataType="models:FoodItem">
+                        <Border StrokeThickness="1"
+                                Stroke="{AppThemeBinding Light=#E0E0E0, Dark=#3A3A3C}"
+                                Padding="16"
+                                Margin="0,0,0,12"
+                                BackgroundColor="{AppThemeBinding Light=#FFFFFF, Dark=#2C2C2E}">
+                            <Border.StrokeShape>
+                                <RoundRectangle CornerRadius="12" />
+                            </Border.StrokeShape>
+                            <Grid ColumnDefinitions="*,Auto">
+                                <VerticalStackLayout Spacing="4">
+                                    <Label Text="{Binding Name}"
+                                           FontSize="18"
+                                           FontAttributes="Bold"
+                                           TextColor="{AppThemeBinding Light=#1F1F1F, Dark=#FFFFFF}" />
+                                    <Label Text="{Binding Description}"
+                                           FontSize="13"
+                                           LineBreakMode="TailTruncation"
+                                           MaxLines="2"
+                                           TextColor="{AppThemeBinding Light=#6C757D, Dark=#8E8E93}" />
+                                    <Label Text="{Binding CaloriesLabel}"
+                                           FontSize="12"
+                                           TextColor="#4CAF50" />
+                                </VerticalStackLayout>
+
+                                <Button Grid.Column="1"
+                                        Text="❤️"
+                                        BackgroundColor="Transparent"
+                                        TextColor="#F44336"
+                                        FontSize="24"
+                                        Command="{Binding Source={RelativeSource AncestorType={x:Type ContentPage}}, Path=BindingContext.RemoveFavoriteCommand}"
+                                        CommandParameter="{Binding .}"
+                                        VerticalOptions="Center"
+                                        WidthRequest="50"
+                                        SemanticProperties.Hint="Remove from favorites" />
+                            </Grid>
+                        </Border>
+                    </DataTemplate>
+                </CollectionView.ItemTemplate>
+            </CollectionView>
+        </RefreshView>
+
+        <ActivityIndicator IsVisible="{Binding IsBusy}"
+                           IsRunning="{Binding IsBusy}"
+                           Color="#2196F3"
+                           HorizontalOptions="Center"
+                           VerticalOptions="Center" />
+    </Grid>
+</ContentPage>
