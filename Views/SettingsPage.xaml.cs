@@ -1,4 +1,5 @@
 ﻿using FoodApp.Services;
+using System.Windows.Input;
 
 namespace FoodApp.Views;
 
@@ -8,6 +9,7 @@ public partial class SettingsPage : ContentPage
     {
         InitializeComponent();
         LargeTextSwitch.IsToggled = AccessibilityService.LargeTextEnabled;
+        BindingContext = this;
     }
 
     protected override void OnAppearing()
@@ -15,6 +17,17 @@ public partial class SettingsPage : ContentPage
         base.OnAppearing();
         AccessibilityService.ApplyFontScale(this);
         UpdatePreview();
+    }
+
+    // 主题切换命令
+    public ICommand SetLightThemeCommand => new Command(() => SetTheme(AppTheme.Light));
+    public ICommand SetDarkThemeCommand => new Command(() => SetTheme(AppTheme.Dark));
+    public ICommand SetSystemThemeCommand => new Command(() => SetTheme(AppTheme.Unspecified));
+
+    private void SetTheme(AppTheme theme)
+    {
+        App.SetTheme(theme);
+        SemanticScreenReader.Announce($"Theme changed to {theme}");
     }
 
     private void OnLargeTextToggled(object? sender, ToggledEventArgs e)
@@ -44,7 +57,7 @@ public partial class SettingsPage : ContentPage
     }
 
     // 主题切换命令可以在 ViewModel 中实现，或直接使用事件
-    private void OnLightThemeClicked(object? sender, EventArgs e)
+    /*private void OnLightThemeClicked(object? sender, EventArgs e)
     {
         App.SetTheme(AppTheme.Light);
     }
@@ -57,5 +70,5 @@ public partial class SettingsPage : ContentPage
     private void OnSystemThemeClicked(object? sender, EventArgs e)
     {
         App.SetTheme(AppTheme.Unspecified);
-    }
+    }*/
 }

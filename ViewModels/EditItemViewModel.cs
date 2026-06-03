@@ -14,6 +14,11 @@ public class EditItemViewModel : BaseViewModel
 
     public ICommand SaveCommand { get; }
     public ICommand CancelCommand { get; }
+    public ICommand DeletePhotoCommand { get; }
+
+    // 用于 UI 判断是否有照片
+    public bool HasPhoto => _currentItem != null && !string.IsNullOrEmpty(_currentItem.PhotoPath);
+    public bool HasNoPhoto => _currentItem != null && string.IsNullOrEmpty(_currentItem.PhotoPath);
 
     public string ItemId
     {
@@ -32,6 +37,8 @@ public class EditItemViewModel : BaseViewModel
         {
             _currentItem = value;
             OnPropertyChanged();
+            OnPropertyChanged(nameof(HasPhoto));   // 通知 UI 刷新
+            OnPropertyChanged(nameof(HasNoPhoto)); // 通知 UI 刷新
         }
     }
 
@@ -43,6 +50,7 @@ public class EditItemViewModel : BaseViewModel
 
         SaveCommand = new Command(async () => await SaveAsync());
         CancelCommand = new Command(async () => await CancelAsync());
+        DeletePhotoCommand = new Command(DeletePhoto);  // 初始化删除照片命令
     }
 
     private async Task LoadItemAsync(string id)
@@ -78,6 +86,34 @@ public class EditItemViewModel : BaseViewModel
         {
             IsBusy = false;
         }
+    }
+
+    // 删除照片的方法
+    private void DeletePhoto()
+    {
+        if (CurrentItem is null) return;
+
+        if (string.IsNullOrEmpty(CurrentItem.PhotoPath))
+        {
+            SemanticScreenReader.Announce("No photo to delete");
+            return;
+        }
+
+        // 删除物理文件
+        if (File.Exists(CurrentItem.PhotoPath))
+        {
+            File.Delete(CurrentItem.PhotoPath);
+        }
+
+        // 清除路径
+        CurrentItem.PhotoPath = null;
+
+        // 刷新 UI
+        OnPropertyChanged(nameof(CurrentItem));
+        OnPropertyChanged(nameof(HasPhoto));
+        OnPropertyChanged(nameof(HasNoPhoto));
+
+        SemanticScreenReader.Announce("Photo deleted");
     }
 
     private async Task SaveAsync()

@@ -3,163 +3,194 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              x:Class="FoodApp.Views.DetailPage"
              Title="{Binding Title}"
-             BackgroundColor="White">
+             BackgroundColor="{AppThemeBinding Light={StaticResource LightBackground}, Dark={StaticResource DarkBackground}}">
 
-	<ScrollView>
-		<VerticalStackLayout Padding="16,12" Spacing="16">
+    <ScrollView>
+        <VerticalStackLayout Padding="16,12" Spacing="16">
 
-			<!-- Header Card -->
-			<Border StrokeThickness="0" Padding="20">
-				<Border.Background>
-					<LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
-						<GradientStop Color="#2196F3" Offset="0" />
-						<GradientStop Color="#1976D2" Offset="1" />
-					</LinearGradientBrush>
-				</Border.Background>
-				<VerticalStackLayout Spacing="8">
-					<Label Text="{Binding CurrentItem.Name}"
-						   FontSize="24"
-						   FontAttributes="Bold"
-						   TextColor="White"
-						   HorizontalTextAlignment="Center" />
-					<Label Text="{Binding DisplayText}"
-						   FontSize="16"
-						   TextColor="#E3F2FD"
-						   HorizontalTextAlignment="Center" />
-				</VerticalStackLayout>
-			</Border>
+            <!-- Header Card -->
+            <Border StrokeThickness="0" Padding="20">
+                <Border.Background>
+                    <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
+                        <GradientStop Color="#2196F3" Offset="0" />
+                        <GradientStop Color="#1976D2" Offset="1" />
+                    </LinearGradientBrush>
+                </Border.Background>
+                <VerticalStackLayout Spacing="8">
+                    <Label Text="{Binding CurrentItem.Name}"
+                           FontSize="24"
+                           FontAttributes="Bold"
+                           TextColor="White"
+                           HorizontalTextAlignment="Center" />
+                    <Label Text="{Binding DisplayText}"
+                           FontSize="16"
+                           TextColor="#E3F2FD"
+                           HorizontalTextAlignment="Center" />
+                </VerticalStackLayout>
+            </Border>
 
-            <!--photo-->
-            <Border StrokeThickness="1" 
-                    Stroke="#E0E0E0" 
+            <!-- 照片显示区域 -->
+            <Border IsVisible="{Binding HasPhoto}"
+                    StrokeThickness="1"
+                    Stroke="{AppThemeBinding Light=#E0E0E0, Dark=#3A3A3C}"
                     Padding="16"
-                    IsVisible="{Binding HasPhoto}">
+                    BackgroundColor="{AppThemeBinding Light={StaticResource LightCardBackground}, Dark={StaticResource DarkCardBackground}}">
+                <Border.StrokeShape>
+                    <RoundRectangle CornerRadius="12" />
+                </Border.StrokeShape>
                 <VerticalStackLayout Spacing="8">
                     <Label Text="📷 Food Photo"
                            FontSize="16"
                            FontAttributes="Bold"
-                           TextColor="#333333" />
+                           TextColor="{AppThemeBinding Light={StaticResource LightText}, Dark={StaticResource DarkText}}" />
                     <Image Source="{Binding CurrentItem.PhotoPath}"
                            Aspect="AspectFill"
                            HeightRequest="200"
-                           WidthRequest="250"
                            HorizontalOptions="Center"
                            SemanticProperties.Description="Food photo" />
                 </VerticalStackLayout>
             </Border>
 
-            <!--no photo -->
-            <Border StrokeThickness="1" 
-                    Stroke="#E0E0E0" 
+            <!-- 无照片提示 -->
+            <Border IsVisible="{Binding HasNoPhoto}"
+                    StrokeThickness="1"
+                    Stroke="{AppThemeBinding Light=#E0E0E0, Dark=#3A3A3C}"
                     Padding="16"
-                    IsVisible="{Binding HasNoPhoto}">
+                    BackgroundColor="{AppThemeBinding Light={StaticResource LightCardBackground}, Dark={StaticResource DarkCardBackground}}">
+                <Border.StrokeShape>
+                    <RoundRectangle CornerRadius="12" />
+                </Border.StrokeShape>
                 <VerticalStackLayout Spacing="8" HorizontalOptions="Center">
                     <Label Text="📷 No Photo"
                            FontSize="14"
-                           TextColor="#999999"
+                           TextColor="{AppThemeBinding Light=#6C757D, Dark=#8E8E93}"
                            HorizontalOptions="Center" />
                     <Label Text="Tap the camera button below to take a photo"
                            FontSize="12"
-                           TextColor="#999999"
+                           TextColor="{AppThemeBinding Light=#6C757D, Dark=#8E8E93}"
                            HorizontalOptions="Center" />
                 </VerticalStackLayout>
             </Border>
 
             <!-- Nutrition Card -->
-			<Border StrokeThickness="1" Stroke="#E0E0E0" Padding="16">
-				<VerticalStackLayout Spacing="8">
-					<Label Text="Nutrition Facts"
-						   FontSize="16"
-						   FontAttributes="Bold"
-						   TextColor="#333333" />
-					<Grid ColumnDefinitions="*,*,*,*" ColumnSpacing="8">
-						<Label Text="{Binding CurrentItem.CaloriesLabel}"
-							   FontSize="14"
-							   TextColor="#2196F3"
-							   FontAttributes="Bold"
-							   HorizontalTextAlignment="Center" />
-						<Label Grid.Column="1"
-							   Text="{Binding CurrentItem.Protein, StringFormat='P: {0}g'}"
-							   FontSize="14"
-							   TextColor="#666666"
-							   HorizontalTextAlignment="Center" />
-						<Label Grid.Column="2"
-							   Text="{Binding CurrentItem.Carbs, StringFormat='C: {0}g'}"
-							   FontSize="14"
-							   TextColor="#666666"
-							   HorizontalTextAlignment="Center" />
-						<Label Grid.Column="3"
-							   Text="{Binding CurrentItem.Fat, StringFormat='F: {0}g'}"
-							   FontSize="14"
-							   TextColor="#666666"
-							   HorizontalTextAlignment="Center" />
-					</Grid>
-				</VerticalStackLayout>
-			</Border>
+            <Border StrokeThickness="1"
+                    Stroke="{AppThemeBinding Light=#E0E0E0, Dark=#3A3A3C}"
+                    Padding="16"
+                    BackgroundColor="{AppThemeBinding Light={StaticResource LightCardBackground}, Dark={StaticResource DarkCardBackground}}">
+                <Border.StrokeShape>
+                    <RoundRectangle CornerRadius="12" />
+                </Border.StrokeShape>
+                <VerticalStackLayout Spacing="8">
+                    <Label Text="Nutrition Facts"
+                           FontSize="16"
+                           FontAttributes="Bold"
+                           TextColor="{AppThemeBinding Light={StaticResource LightText}, Dark={StaticResource DarkText}}" />
+                    <Grid ColumnDefinitions="*,*,*,*" ColumnSpacing="8">
+                        <Label Text="{Binding CurrentItem.CaloriesLabel}"
+                               FontSize="14"
+                               TextColor="#2196F3"
+                               FontAttributes="Bold"
+                               HorizontalTextAlignment="Center" />
+                        <Label Grid.Column="1"
+                               Text="{Binding CurrentItem.Protein, StringFormat='P: {0}g'}"
+                               FontSize="14"
+                               TextColor="{AppThemeBinding Light=#666666, Dark=#AAAAAA}"
+                               HorizontalTextAlignment="Center" />
+                        <Label Grid.Column="2"
+                               Text="{Binding CurrentItem.Carbs, StringFormat='C: {0}g'}"
+                               FontSize="14"
+                               TextColor="{AppThemeBinding Light=#666666, Dark=#AAAAAA}"
+                               HorizontalTextAlignment="Center" />
+                        <Label Grid.Column="3"
+                               Text="{Binding CurrentItem.Fat, StringFormat='F: {0}g'}"
+                               FontSize="14"
+                               TextColor="{AppThemeBinding Light=#666666, Dark=#AAAAAA}"
+                               HorizontalTextAlignment="Center" />
+                    </Grid>
+                </VerticalStackLayout>
+            </Border>
 
-			<!-- Description Card -->
-			<Border StrokeThickness="1" Stroke="#E0E0E0" Padding="16">
-				<VerticalStackLayout Spacing="8">
-					<Label Text="Description"
-						   FontSize="16"
-						   FontAttributes="Bold"
-						   TextColor="#333333" />
-					<Label Text="{Binding CurrentItem.Description}"
-						   FontSize="14"
-						   TextColor="#666666" />
-					<Label Text="{Binding CurrentItem.AllergyInfo}"
-						   FontSize="13"
-						   TextColor="#F44336"
-						   FontAttributes="Italic" />
-				</VerticalStackLayout>
-			</Border>
+            <!-- Description Card -->
+            <Border StrokeThickness="1"
+                    Stroke="{AppThemeBinding Light=#E0E0E0, Dark=#3A3A3C}"
+                    Padding="16"
+                    BackgroundColor="{AppThemeBinding Light={StaticResource LightCardBackground}, Dark={StaticResource DarkCardBackground}}">
+                <Border.StrokeShape>
+                    <RoundRectangle CornerRadius="12" />
+                </Border.StrokeShape>
+                <VerticalStackLayout Spacing="8">
+                    <Label Text="Description"
+                           FontSize="16"
+                           FontAttributes="Bold"
+                           TextColor="{AppThemeBinding Light={StaticResource LightText}, Dark={StaticResource DarkText}}" />
+                    <Label Text="{Binding CurrentItem.Description}"
+                           FontSize="14"
+                           TextColor="{AppThemeBinding Light=#666666, Dark=#AAAAAA}" />
+                    <Label Text="{Binding CurrentItem.AllergyInfo}"
+                           FontSize="13"
+                           TextColor="#F44336"
+                           FontAttributes="Italic" />
+                </VerticalStackLayout>
+            </Border>
 
-			<!-- Hardware Feature Buttons -->
-			<Label Text="Device Features"
+            <!-- 按钮区域 -->
+            <Label Text="Device Features"
                    FontSize="16"
                    FontAttributes="Bold"
-                   TextColor="#333333"
+                   TextColor="{AppThemeBinding Light={StaticResource LightText}, Dark={StaticResource DarkText}}"
                    Margin="0,8,0,0" />
 
-			<Grid ColumnDefinitions="*,*" ColumnSpacing="12">
-				<Button Text="Speak"
+            <Grid ColumnDefinitions="*,*" ColumnSpacing="12">
+                <Button Text="Speak"
                         BackgroundColor="#2196F3"
+                        TextColor="White"
                         Command="{Binding SpeakCommand}"
+                        CornerRadius="8"
                         SemanticProperties.Hint="Read food description aloud" />
-				<Button Grid.Column="1"
+                <Button Grid.Column="1"
                         Text="Stop"
                         BackgroundColor="#9E9E9E"
+                        TextColor="White"
                         Command="{Binding StopSpeechCommand}"
+                        CornerRadius="8"
                         SemanticProperties.Hint="Stop reading aloud" />
-			</Grid>
+            </Grid>
 
-			<Grid ColumnDefinitions="*,*" ColumnSpacing="12">
-				<Button Text="Vibrate"
-                        BackgroundColor="#FF9800"
-                        Command="{Binding VibrateCommand}"
-                        SemanticProperties.Hint="Trigger vibration feedback" />
-				<Button Grid.Column="1"
-                        Text="Take Photo"
+            <Grid ColumnDefinitions="*,*" ColumnSpacing="12">
+                <Button Text="📷 Take Photo"
                         BackgroundColor="#607D8B"
+                        TextColor="White"
                         Command="{Binding TakePhotoCommand}"
+                        CornerRadius="8"
                         SemanticProperties.Hint="Take a photo of this food" />
-			</Grid>
+                <Button Grid.Column="1"
+                        Text="Vibrate"
+                        BackgroundColor="#FF9800"
+                        TextColor="White"
+                        Command="{Binding VibrateCommand}"
+                        CornerRadius="8"
+                        SemanticProperties.Hint="Trigger vibration feedback" />
+            </Grid>
 
-			<Grid ColumnDefinitions="*,*" ColumnSpacing="12">
-				<Button Text="Edit"
+            <Grid ColumnDefinitions="*,*" ColumnSpacing="12">
+                <Button Text="✏️ Edit"
                         BackgroundColor="#4CAF50"
+                        TextColor="White"
                         Command="{Binding EditCommand}"
+                        CornerRadius="8"
                         SemanticProperties.Hint="Edit this food item" />
-				<Button Grid.Column="1"
-                        Text="Delete"
+                <Button Grid.Column="1"
+                        Text="🗑️ Delete"
                         BackgroundColor="#F44336"
+                        TextColor="White"
                         Command="{Binding DeleteCommand}"
+                        CornerRadius="8"
                         SemanticProperties.Hint="Delete this food item" />
-			</Grid>
+            </Grid>
 
-			<ActivityIndicator IsVisible="{Binding IsBusy}"
+            <ActivityIndicator IsVisible="{Binding IsBusy}"
                                IsRunning="{Binding IsBusy}"
                                Color="#2196F3" />
-		</VerticalStackLayout>
-	</ScrollView>
+        </VerticalStackLayout>
+    </ScrollView>
 </ContentPage>
