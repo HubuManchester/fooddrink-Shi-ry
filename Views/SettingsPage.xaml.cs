@@ -19,7 +19,7 @@ public partial class SettingsPage : ContentPage
         UpdatePreview();
     }
 
-    // 主题切换命令
+    // switch brighrness
     public ICommand SetLightThemeCommand => new Command(() => SetTheme(AppTheme.Light));
     public ICommand SetDarkThemeCommand => new Command(() => SetTheme(AppTheme.Dark));
     public ICommand SetSystemThemeCommand => new Command(() => SetTheme(AppTheme.Unspecified));
@@ -35,10 +35,8 @@ public partial class SettingsPage : ContentPage
         AccessibilityService.LargeTextEnabled = e.Value;
         UpdatePreview();
 
-        // 重新应用字体缩放到当前页面
         AccessibilityService.ApplyFontScale(this);
 
-        // 通知用户
         SemanticScreenReader.Announce(e.Value ? "Large text mode enabled" : "Large text mode disabled");
     }
 

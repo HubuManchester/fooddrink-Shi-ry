@@ -1,4 +1,5 @@
-﻿using FoodApp.ViewModels;
+﻿using FoodApp.Services;
+using FoodApp.ViewModels;
 
 namespace FoodApp.Views;
 
@@ -8,5 +9,11 @@ public partial class DetailPage : ContentPage
     {
         InitializeComponent();
         BindingContext = viewModel;
+    }
+
+    protected override void OnAppearing()
+    {
+        base.OnAppearing();
+        AccessibilityService.ApplyFontScale(this);
     }
 }

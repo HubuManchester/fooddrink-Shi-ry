@@ -14,9 +14,9 @@ public partial class MainPage : ContentPage
     protected override void OnAppearing()
     {
         base.OnAppearing();
-        // 应用字体缩放
+        //apply font scaling
         AccessibilityService.ApplyFontScale(this);
-        // 加载数据
+        //load data
         ((MainViewModel)BindingContext).LoadItemsCommand.Execute(null);
     }
 }
