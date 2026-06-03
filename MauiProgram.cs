@@ -20,16 +20,15 @@ public static class MauiProgram
                 fonts.AddFont("OpenSans-Semibold.ttf", "OpenSansSemibold");
             });
 
-        // 注册服务（替换原来的 FoodService）
         builder.Services.AddSingleton<FoodDatabaseService>();
         builder.Services.AddSingleton<FoodService>();
 
-        // 注册 ViewModels
+        // registrate ViewModels
         builder.Services.AddSingleton<MainViewModel>();
         builder.Services.AddTransient<AddItemViewModel>();
         builder.Services.AddTransient<DetailViewModel>();
 
-        // 注册页面
+        // registration
         builder.Services.AddSingleton<MainPage>();
         builder.Services.AddTransient<AddItemPage>();
         builder.Services.AddTransient<DetailPage>();

@@ -402,7 +402,6 @@ public class DetailViewModel : BaseViewModel
 
                 MainThread.BeginInvokeOnMainThread(async () =>
                 {
-                    // 震动反馈表示检测到晃动
                     HapticFeedback.Default.Perform(HapticFeedbackType.LongPress);
                     await AddToFavoriteAsync();
                 });

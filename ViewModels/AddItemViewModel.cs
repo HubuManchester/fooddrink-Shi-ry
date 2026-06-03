@@ -18,7 +18,6 @@ public class AddItemViewModel : BaseViewModel
     private string _fat = string.Empty;
     private string _allergyInfo = string.Empty;
 
-    // ========== 验证错误信息（新增）==========
     private string _nameError = string.Empty;
     private string _categoryError = string.Empty;
     private string _caloriesError = string.Empty;
@@ -26,7 +25,6 @@ public class AddItemViewModel : BaseViewModel
     public ICommand SaveCommand { get; }
     public ICommand CancelCommand { get; }
 
-    // ========== 原有属性 ==========
     public string Name
     {
         get => _name;
@@ -34,7 +32,7 @@ public class AddItemViewModel : BaseViewModel
         {
             _name = value;
             OnPropertyChanged();
-            ValidateName();  // 新增：实时验证
+            ValidateName(); 
         }
     }
 
@@ -45,7 +43,7 @@ public class AddItemViewModel : BaseViewModel
         {
             _category = value;
             OnPropertyChanged();
-            ValidateCategory();  // 新增：实时验证
+            ValidateCategory();
         }
     }
 
@@ -62,7 +60,7 @@ public class AddItemViewModel : BaseViewModel
         {
             _calories = value;
             OnPropertyChanged();
-            ValidateCalories();  // 新增：实时验证
+            ValidateCalories();
         }
     }
 
@@ -90,7 +88,6 @@ public class AddItemViewModel : BaseViewModel
         set { _allergyInfo = value; OnPropertyChanged(); }
     }
 
-    // ========== 验证错误属性（新增）==========
     public string NameError
     {
         get => _nameError;
@@ -133,13 +130,10 @@ public class AddItemViewModel : BaseViewModel
 
     public bool HasCaloriesError => !string.IsNullOrEmpty(CaloriesError);
 
-    // 是否可以保存（所有验证都通过）
     public bool CanSave => !HasNameError && !HasCategoryError && !HasCaloriesError &&
                            !string.IsNullOrWhiteSpace(Name) &&
                            !string.IsNullOrWhiteSpace(Category);
 
-    // ========== 构造函数 ==========
-    // 注意：参数顺序改了，先注入 FoodDatabaseService，再注入 FoodService
     public AddItemViewModel(FoodDatabaseService databaseService, FoodService foodService)
     {
         _databaseService = databaseService;
@@ -150,7 +144,6 @@ public class AddItemViewModel : BaseViewModel
         CancelCommand = new Command(async () => await CancelAsync());
     }
 
-    // ========== 验证方法（新增）==========
     private void ValidateName()
     {
         if (string.IsNullOrWhiteSpace(Name))
@@ -179,12 +172,10 @@ public class AddItemViewModel : BaseViewModel
             CaloriesError = string.Empty;
     }
 
-    // ========== 保存方法 ==========
     private async Task SaveAsync()
     {
         if (IsBusy) return;
 
-        // 最终验证（确保所有字段都有效）
         ValidateName();
         ValidateCategory();
         ValidateCalories();
@@ -195,7 +186,6 @@ public class AddItemViewModel : BaseViewModel
             return;
         }
 
-        // 解析数值
         if (!int.TryParse(Calories, out int calories) || calories < 0)
         {
             await ShowAlertAsync("Validation Error", "Please enter a valid calorie amount (0 or greater).");
@@ -225,16 +215,15 @@ public class AddItemViewModel : BaseViewModel
                 Carbs = carbs,
                 Fat = fat,
                 AllergyInfo = string.IsNullOrWhiteSpace(AllergyInfo) ? "No allergy information provided." : AllergyInfo.Trim(),
-                CreatedAt = DateTime.Now  // 新增：记录创建时间
+                CreatedAt = DateTime.Now
             };
 
-            // ========== 同时保存到数据库和内存服务 ==========
-            await _databaseService.AddAsync(item);  // 保存到 SQLite 数据库
-            await _foodService.AddAsync(item);       // 保存到内存缓存
+            await _databaseService.AddAsync(item);  // Save to SQLite database
+            await _foodService.AddAsync(item);       // Save to memory cache
 
             HapticFeedback.Default.Perform(HapticFeedbackType.Click);
 
-            // 屏幕阅读器播报（无障碍）
+            // Screen reader announcement (accessibility)
             SemanticScreenReader.Announce($"Added {item.Name} successfully");
 
             await ShowAlertAsync("Success", $"'{item.Name}' has been added to your collection.");

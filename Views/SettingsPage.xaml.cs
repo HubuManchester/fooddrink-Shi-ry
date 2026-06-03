@@ -53,20 +53,4 @@ public partial class SettingsPage : ContentPage
             PreviewLabel.TextColor = Colors.Gray;
         }
     }
-
-    // 主题切换命令可以在 ViewModel 中实现，或直接使用事件
-    /*private void OnLightThemeClicked(object? sender, EventArgs e)
-    {
-        App.SetTheme(AppTheme.Light);
-    }
-
-    private void OnDarkThemeClicked(object? sender, EventArgs e)
-    {
-        App.SetTheme(AppTheme.Dark);
-    }
-
-    private void OnSystemThemeClicked(object? sender, EventArgs e)
-    {
-        App.SetTheme(AppTheme.Unspecified);
-    }*/
 }

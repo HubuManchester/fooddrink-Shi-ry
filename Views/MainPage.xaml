@@ -9,7 +9,7 @@
 
 	<Grid RowDefinitions="Auto, *">
 
-		<!-- 顶部标题栏 -->
+        <!--Top title bar -->
 		<Border BackgroundColor="{StaticResource Primary}"
                 Padding="16,20">
 			<VerticalStackLayout>
@@ -35,7 +35,7 @@
 			</VerticalStackLayout>
 		</Border>
 
-		<!-- 刷新视图 + 列表 -->
+        <!-- Refresh view + List -->
 		<RefreshView Grid.Row="1"
                      Command="{Binding LoadItemsCommand}"
                      IsRefreshing="{Binding IsBusy, Mode=OneWay}">
@@ -43,7 +43,7 @@
                             SelectionMode="None"
                             Margin="12,12,12,0">
 
-				<!-- 空状态提示 -->
+                <!-- Empty state prompt -->
 				<CollectionView.EmptyView>
 					<VerticalStackLayout Padding="50" Spacing="10" HorizontalOptions="Center">
 						<Label Text="🍕"

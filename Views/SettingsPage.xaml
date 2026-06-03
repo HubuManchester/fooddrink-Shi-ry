@@ -12,7 +12,7 @@
                    FontAttributes="Bold"
                    SemanticProperties.HeadingLevel="Level1" />
 
-			<!-- 主题设置卡片 -->
+			<!-- Theme Setting Card -->
 			<Border StrokeThickness="1"
                     Stroke="#E0E0E0"
                     Padding="16"
@@ -29,7 +29,6 @@
                            FontSize="14"
                            TextColor="{AppThemeBinding Light=#6C757D, Dark=#8E8E93}" />
 
-					<!-- 三个按钮分开写，每个都独立 -->
 					<Button Text="☀️ Light"
                             Command="{Binding SetLightThemeCommand}"
                             BackgroundColor="#2196F3"
@@ -53,7 +52,7 @@
 				</VerticalStackLayout>
 			</Border>
 
-			<!-- 无障碍设置卡片 -->
+			<!--Accessibility Settings Card-->
 			<Border Style="{StaticResource CardStyle}">
 				<VerticalStackLayout Spacing="12">
 					<Grid ColumnDefinitions="*,Auto" ColumnSpacing="12">
@@ -73,7 +72,7 @@
 				</VerticalStackLayout>
 			</Border>
 
-			<!-- 预览区域 -->
+			<!-- preview area -->
 			<Border Style="{StaticResource CardStyle}">
 				<VerticalStackLayout Spacing="8">
 					<Label Text="Preview"

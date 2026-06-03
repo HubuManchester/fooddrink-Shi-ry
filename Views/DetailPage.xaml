@@ -29,7 +29,7 @@
                 </VerticalStackLayout>
             </Border>
 
-            <!-- 照片显示区域 -->
+            <!-- photo area -->
             <Border IsVisible="{Binding HasPhoto}"
                     StrokeThickness="1"
                     Stroke="{AppThemeBinding Light=#E0E0E0, Dark=#3A3A3C}"

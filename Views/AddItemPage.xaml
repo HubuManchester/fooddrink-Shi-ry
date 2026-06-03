@@ -14,7 +14,7 @@
                    TextColor="{AppThemeBinding Light={StaticResource LightText}, Dark={StaticResource DarkText}}"
                    SemanticProperties.HeadingLevel="Level1" />
 
-            <!-- 基本信息卡片 -->
+            <!-- basic information card -->
             <Border StrokeThickness="1"
                     Stroke="{AppThemeBinding Light=#E0E0E0, Dark=#3A3A3C}"
                     Padding="16"
@@ -60,7 +60,7 @@
                 </VerticalStackLayout>
             </Border>
 
-            <!-- 营养信息卡片 -->
+            <!-- Nutrition Information Card -->
             <Border StrokeThickness="1"
                     Stroke="{AppThemeBinding Light=#E0E0E0, Dark=#3A3A3C}"
                     Padding="16"
@@ -112,7 +112,7 @@
                 </VerticalStackLayout>
             </Border>
 
-            <!-- 按钮 -->
+            <!-- botton -->
             <Grid ColumnDefinitions="*,*" ColumnSpacing="12" Margin="0,8,0,0">
                 <Button Text="Cancel"
                         BackgroundColor="#9E9E9E"

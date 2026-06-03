@@ -2,14 +2,14 @@
 
 public partial class App : Application
 {
-    // 公开的属性，供设置页面使用
+    // Public attribute, for use in the configuration page
     public static AppTheme CurrentTheme { get; private set; } = AppTheme.Unspecified;
 
     public App()
     {
         InitializeComponent();
 
-        // 加载保存的主题设置
+        // Load saved theme settings
         LoadTheme();
 
         MainPage = new AppShell();
@@ -17,7 +17,6 @@ public partial class App : Application
 
     private void LoadTheme()
     {
-        // 使用 Preferences 保存用户的主题选择
         var themePreference = Preferences.Get("AppTheme", "default");
         CurrentTheme = themePreference switch
         {

@@ -16,7 +16,7 @@ public class EditItemViewModel : BaseViewModel
     public ICommand CancelCommand { get; }
     public ICommand DeletePhotoCommand { get; }
 
-    // 用于 UI 判断是否有照片
+    // Used for UI to determine whether there is a photo
     public bool HasPhoto => _currentItem != null && !string.IsNullOrEmpty(_currentItem.PhotoPath);
     public bool HasNoPhoto => _currentItem != null && string.IsNullOrEmpty(_currentItem.PhotoPath);
 
@@ -37,8 +37,8 @@ public class EditItemViewModel : BaseViewModel
         {
             _currentItem = value;
             OnPropertyChanged();
-            OnPropertyChanged(nameof(HasPhoto));   // 通知 UI 刷新
-            OnPropertyChanged(nameof(HasNoPhoto)); // 通知 UI 刷新
+            OnPropertyChanged(nameof(HasPhoto));  
+            OnPropertyChanged(nameof(HasNoPhoto)); 
         }
     }
 
@@ -50,7 +50,7 @@ public class EditItemViewModel : BaseViewModel
 
         SaveCommand = new Command(async () => await SaveAsync());
         CancelCommand = new Command(async () => await CancelAsync());
-        DeletePhotoCommand = new Command(DeletePhoto);  // 初始化删除照片命令
+        DeletePhotoCommand = new Command(DeletePhoto); 
     }
 
     private async Task LoadItemAsync(string id)
@@ -87,8 +87,6 @@ public class EditItemViewModel : BaseViewModel
             IsBusy = false;
         }
     }
-
-    // 删除照片的方法
     private void DeletePhoto()
     {
         if (CurrentItem is null) return;
@@ -99,16 +97,13 @@ public class EditItemViewModel : BaseViewModel
             return;
         }
 
-        // 删除物理文件
         if (File.Exists(CurrentItem.PhotoPath))
         {
             File.Delete(CurrentItem.PhotoPath);
         }
 
-        // 清除路径
         CurrentItem.PhotoPath = null;
 
-        // 刷新 UI
         OnPropertyChanged(nameof(CurrentItem));
         OnPropertyChanged(nameof(HasPhoto));
         OnPropertyChanged(nameof(HasNoPhoto));
@@ -121,7 +116,6 @@ public class EditItemViewModel : BaseViewModel
         if (CurrentItem is null) return;
         if (IsBusy) return;
 
-        // 验证
         if (string.IsNullOrWhiteSpace(CurrentItem.Name))
         {
             await ShowAlertAsync("Validation Error", "Please enter a food name.");
@@ -138,10 +132,8 @@ public class EditItemViewModel : BaseViewModel
         {
             IsBusy = true;
 
-            // 更新时间戳
             CurrentItem.CreatedAt = DateTime.Now;
 
-            // 更新数据库和内存服务
             if (_databaseService != null)
             {
                 await _databaseService.UpdateAsync(CurrentItem);
