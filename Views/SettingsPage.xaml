@@ -22,11 +22,11 @@
 				</Border.StrokeShape>
 				<VerticalStackLayout Spacing="12">
 					<Label Text="Theme"
-                           FontSize="16"
+                           FontSize="18"
                            FontAttributes="Bold" />
 
 					<Label Text="Choose your preferred app appearance"
-                           FontSize="12"
+                           FontSize="14"
                            TextColor="{AppThemeBinding Light=#6C757D, Dark=#8E8E93}" />
 
 					<!-- 三个按钮分开写，每个都独立 -->
@@ -56,17 +56,13 @@
 			<!-- 无障碍设置卡片 -->
 			<Border Style="{StaticResource CardStyle}">
 				<VerticalStackLayout Spacing="12">
-					<Label Text="♿ Accessibility"
-                           FontSize="16"
-                           FontAttributes="Bold" />
-
 					<Grid ColumnDefinitions="*,Auto" ColumnSpacing="12">
 						<VerticalStackLayout Spacing="4">
 							<Label Text="Large Text Mode"
-                                   FontSize="16"
+                                   FontSize="18"
                                    FontAttributes="Bold" />
 							<Label Text="Increase text size for better readability"
-                                   FontSize="12"
+                                   FontSize="14"
                                    TextColor="{StaticResource LightSubText}" />
 						</VerticalStackLayout>
 						<Switch Grid.Column="1"
@@ -81,7 +77,7 @@
 			<Border Style="{StaticResource CardStyle}">
 				<VerticalStackLayout Spacing="8">
 					<Label Text="Preview"
-                           FontSize="16"
+                           FontSize="18"
                            FontAttributes="Bold" />
 					<Label x:Name="PreviewLabel"
                            Text="This text will change size when large text mode is enabled."

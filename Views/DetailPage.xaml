@@ -194,27 +194,26 @@
                    TextColor="{AppThemeBinding Light={StaticResource LightText}, Dark={StaticResource DarkText}}"
                    Margin="0,8,0,0" />
 
-            <Grid ColumnDefinitions="*,*" ColumnSpacing="12">
-                <!-- Add to Favorite button -->
-                <Button x:Name="AddFavoriteButton"
-                        Text="❤️ Add to Favorite"
-                        BackgroundColor="#E91E63"
-                        TextColor="White"
-                        Command="{Binding AddToFavoriteCommand}"
-                        IsVisible="{Binding IsNotFavorite}"
-                        CornerRadius="8"
-                        SemanticProperties.Hint="Add this food to favorites" />
-
-                <!-- Remove from Favorite button -->
-                <Button x:Name="RemoveFavoriteButton"
-                        Text="💔 Remove from Favorite"
-                        BackgroundColor="#9E9E9E"
-                        TextColor="White"
-                        Command="{Binding RemoveFromFavoriteCommand}"
-                        IsVisible="{Binding IsFavorite}"
-                        CornerRadius="8"
-                        SemanticProperties.Hint="Remove this food from favorites" />
-            </Grid>
+            <!-- Add to Favorite button -->
+            <Button x:Name="AddFavoriteButton"
+                    Text="❤️ Add to Favorite"
+                    BackgroundColor="#E91E63"
+                    TextColor="White"
+                    Command="{Binding AddToFavoriteCommand}"
+                    IsVisible="{Binding IsNotFavorite}"
+                    CornerRadius="8"
+                    SemanticProperties.Hint="Add this food to favorites" />
+            
+            <!-- Remove from Favorite button -->
+            <Button x:Name="RemoveFavoriteButton"
+                    Text="💔 Remove from Favorite"
+                    BackgroundColor="#9E9E9E"
+                    TextColor="White"
+                    Command="{Binding RemoveFromFavoriteCommand}"
+                    IsVisible="{Binding IsFavorite}"
+                    CornerRadius="8"
+                    SemanticProperties.Hint="Remove this food from favorites" />
+            
 
             <Label Text="Location"
                         FontSize="16"
