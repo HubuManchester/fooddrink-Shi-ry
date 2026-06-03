@@ -216,6 +216,29 @@
                         SemanticProperties.Hint="Remove this food from favorites" />
             </Grid>
 
+            <Label Text="Location"
+                        FontSize="16"
+                        FontAttributes="Bold"
+                        TextColor="{AppThemeBinding Light={StaticResource LightText}, Dark={StaticResource DarkText}}"
+                        Margin="0,8,0,0" />
+
+            <Grid ColumnDefinitions="*,*" ColumnSpacing="12">
+                <Button Text="📍 Get Location"
+                        BackgroundColor="#9C27B0"
+                        TextColor="White"
+                        Command="{Binding GetLocationCommand}"
+                        CornerRadius="8"
+                        SemanticProperties.Hint="Record current location for this food" />
+
+                <Button Grid.Column="1"
+                        Text="🗺️ Open in Maps"
+                        BackgroundColor="#2196F3"
+                        TextColor="White"
+                        Command="{Binding OpenMapCommand}"
+                        CornerRadius="8"
+                        SemanticProperties.Hint="Open this location in maps" />
+            </Grid>
+
 
             <ActivityIndicator IsVisible="{Binding IsBusy}"
                                IsRunning="{Binding IsBusy}"

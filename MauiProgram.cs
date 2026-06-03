@@ -39,6 +39,7 @@ public static class MauiProgram
         builder.Services.AddTransient<FavoritesPage>();
         builder.Services.AddTransient<FavoritesViewModel>();
 
+
 #if DEBUG
         builder.Logging.AddDebug();
 #endif

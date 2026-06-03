@@ -67,7 +67,7 @@
                                         Command="{Binding Source={RelativeSource AncestorType={x:Type ContentPage}}, Path=BindingContext.RemoveFavoriteCommand}"
                                         CommandParameter="{Binding .}"
                                         VerticalOptions="Center"
-                                        WidthRequest="50"
+                                        WidthRequest="70"
                                         SemanticProperties.Hint="Remove from favorites" />
                             </Grid>
                         </Border>

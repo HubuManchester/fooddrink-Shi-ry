@@ -29,7 +29,7 @@ public class FoodDatabaseService
         _isInitialized = true;
     }
 
-    // 添加（返回数据库自增 ID）
+    // add
     public async Task<int> AddAsync(FoodItem item)
     {
         await InitAsync();
@@ -44,7 +44,7 @@ public class FoodDatabaseService
         return result;
     }
 
-    // 获取所有
+    // get all
     public async Task<List<FoodItem>> GetAllAsync()
     {
         await InitAsync();
@@ -52,7 +52,6 @@ public class FoodDatabaseService
         return await _database.Table<FoodItem>().ToListAsync();
     }
 
-    // 根据字符串 ID 获取（用于路由导航）
     public async Task<FoodItem?> GetByIdAsync(string id)
     {
         await InitAsync();
@@ -73,7 +72,6 @@ public class FoodDatabaseService
         return result;
     }
 
-    // 根据本地数据库 ID 获取
     public async Task<FoodItem?> GetByLocalIdAsync(int localId)
     {
         await InitAsync();
@@ -81,7 +79,7 @@ public class FoodDatabaseService
         return await _database.Table<FoodItem>().FirstOrDefaultAsync(x => x.LocalId == localId);
     }
 
-    // 搜索
+    // search
     public async Task<List<FoodItem>> SearchAsync(string? query)
     {
         await InitAsync();
@@ -100,7 +98,7 @@ public class FoodDatabaseService
             .ToListAsync();
     }
 
-    // 更新
+    // update
     public async Task<int> UpdateAsync(FoodItem item)
     {
         await InitAsync();
@@ -120,7 +118,7 @@ public class FoodDatabaseService
         return result;
     }
 
-    // 删除（根据字符串 ID）
+    // delete by id
     public async Task<int> DeleteAsync(string id)
     {
         await InitAsync();
@@ -130,7 +128,7 @@ public class FoodDatabaseService
         return await _database.DeleteAsync(item);
     }
 
-    // 删除（根据 FoodItem 对象）
+    // delete by item
     public async Task<int> DeleteAsync(FoodItem item)
     {
         await InitAsync();

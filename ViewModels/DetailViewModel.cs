@@ -27,6 +27,8 @@ public class DetailViewModel : BaseViewModel
     public ICommand DeleteCommand { get; }
     public ICommand AddToFavoriteCommand { get; }
     public ICommand RemoveFromFavoriteCommand { get; }
+    public ICommand GetLocationCommand { get; }
+    public ICommand OpenMapCommand { get; }
 
     // Properties
     public string ItemId
@@ -76,6 +78,8 @@ public class DetailViewModel : BaseViewModel
         DeleteCommand = new Command(async () => await DeleteAsync());
         AddToFavoriteCommand = new Command(async () => await AddToFavoriteAsync());
         RemoveFromFavoriteCommand = new Command(async () => await RemoveFromFavoriteAsync());
+        GetLocationCommand = new Command(async () => await GetCurrentLocationAsync());
+        OpenMapCommand = new Command(async () => await OpenMapAsync());
     }
 
     private async Task LoadItemAsync(string id)
@@ -403,6 +407,129 @@ public class DetailViewModel : BaseViewModel
                     await AddToFavoriteAsync();
                 });
             }
+        }
+    }
+
+    private async Task GetCurrentLocationAsync()
+    {
+        if (_currentItem == null)
+        {
+            await ShowAlertAsync("Error", "No food item loaded.");
+            return;
+        }
+
+        try
+        {
+            // Request location permission
+            var locationStatus = await Permissions.RequestAsync<Permissions.LocationWhenInUse>();
+            if (locationStatus != PermissionStatus.Granted)
+            {
+                await ShowAlertAsync("Permission Denied", "Location permission is required to record your dining location.");
+                return;
+            }
+
+            IsBusy = true;
+            SemanticScreenReader.Announce("Getting current location...");
+
+            // Get current location
+            var request = new GeolocationRequest(GeolocationAccuracy.Medium, TimeSpan.FromSeconds(15));
+            var location = await Geolocation.Default.GetLocationAsync(request);
+
+            if (location == null)
+            {
+                await ShowAlertAsync("Location Failed", "Unable to get current location. Please try again.");
+                return;
+            }
+
+            // Save location to current item
+            _currentItem.Latitude = location.Latitude;
+            _currentItem.Longitude = location.Longitude;
+
+            // Try to get address from coordinates (reverse geocoding)
+            try
+            {
+                var placemarks = await Geocoding.Default.GetPlacemarksAsync(location.Latitude, location.Longitude);
+                var placemark = placemarks?.FirstOrDefault();
+                if (placemark != null)
+                {
+                    var addressParts = new[]
+                    {
+                    placemark.CountryName,
+                    placemark.AdminArea,
+                    placemark.Locality,
+                    placemark.Thoroughfare
+                };
+                    _currentItem.LocationName = string.Join(", ", addressParts.Where(p => !string.IsNullOrEmpty(p)));
+                }
+            }
+            catch
+            {
+                // Geocoding failed, just use coordinates
+                _currentItem.LocationName = $"{location.Latitude:F4}, {location.Longitude:F4}";
+            }
+
+            // Save to database
+            if (_databaseService != null)
+            {
+                await _databaseService.UpdateAsync(_currentItem);
+            }
+
+            if (_foodService != null)
+            {
+                await _foodService.UpdateAsync(_currentItem);
+            }
+
+            // Show success message with location info
+            var message = string.IsNullOrEmpty(_currentItem.LocationName)
+                ? $"Location saved: {location.Latitude:F4}, {location.Longitude:F4}"
+                : $"Location saved: {_currentItem.LocationName}";
+
+            await ShowAlertAsync("Location Saved", message);
+            SemanticScreenReader.Announce("Location saved");
+
+            // Refresh UI
+            OnPropertyChanged(nameof(CurrentItem));
+        }
+        catch (Exception ex)
+        {
+            await ShowAlertAsync("Location Error", $"Failed to get location: {ex.Message}");
+        }
+        finally
+        {
+            IsBusy = false;
+        }
+    }
+    private async Task OpenMapAsync()
+    {
+        if (_currentItem == null)
+        {
+            await ShowAlertAsync("Error", "No food item loaded.");
+            return;
+        }
+
+        if (_currentItem.Latitude == null || _currentItem.Longitude == null)
+        {
+            await ShowAlertAsync("No Location", "This food item doesn't have a saved location. Tap 'Get Location' first.");
+            return;
+        }
+
+        try
+        {
+            var latitude = _currentItem.Latitude.Value;
+            var longitude = _currentItem.Longitude.Value;
+
+            // Open in system maps app
+            var options = new MapLaunchOptions
+            {
+                Name = _currentItem.Name ?? "Food Location",
+                NavigationMode = NavigationMode.None
+            };
+
+            await Map.Default.OpenAsync(latitude, longitude, options);
+        }
+        catch (Exception ex)
+        {
+            await ShowAlertAsync("Map Error", $"Failed to open maps: {ex.Message}");
         }
     }
 }
